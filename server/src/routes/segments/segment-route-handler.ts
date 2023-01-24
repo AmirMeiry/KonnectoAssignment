@@ -13,17 +13,9 @@ export async function segmentList(req: Request, res: Response): Promise<void> {
     const segmentCollection: Collection = await (
       await getDbWrapper()
     ).getCollection("segments");
-
-    // todo TASK 1
-    // write this function to return { data: ISegmentMetaData[]; totalCount: number };
-    // where data is an array of ISegmentMetaData, and totalCount is the # of total segments
-
-    // the "users" collection
-    // const userCollection: Collection = await (await getDbWrapper()).getCollection('users');
-    // has a "many to many" relationship to the segment collection, check IUser interface or query the raw data.
-    // res.json({ success: true, data: ISegmentMetaData[], totalCount });
-
-    res.json({ success: true });
+    const metaData = await segmentCollection.find({}, { projection: { name: 1} }).toArray();
+    const totalCount = await segmentCollection.countDocuments();
+    res.json({ success: true, data: metaData, totalCount });
   } catch (error) {
     handleResponseError(
       `Get Segment List Error: ${error.message}`,
@@ -84,17 +76,24 @@ export async function getSegmentGenderData(
     const segmentCollection: Collection = await (
       await getDbWrapper()
     ).getCollection("segments");
-
-    // todo TASK 2
-    // write this function to return
-    // data = [ { _id: "Male", userCount: x1, userPercentage: y1 }, { _id: "Female", userCount: x2, userPercentage: y2} ]
-
-    // the "users" collection
-    // const userCollection: Collection = await (await getDbWrapper()).getCollection('users');
-    // has a "many to many" relationship to the segment collection, check IUser interface or query the raw data.
-    // res.json({ success: true, data: ISegmentGenderData[] });
-
-    res.json({ success: true });
+      const userCollection: Collection = await (await getDbWrapper()).getCollection("users");
+      const genderData = await userCollection.aggregate([
+          {
+              $group: {
+                  _id: "$gender",
+                  userCount: { $sum: 1 }
+              }
+          }
+      ]).toArray();
+      const totalUsers = await userCollection.countDocuments();
+      const data = genderData.map(g => {
+          return {
+              _id: g._id,
+              userCount: g.userCount,
+              userPercentage: (g.userCount / totalUsers) * 100
+          }
+      });
+      res.json({ success: true, data });
   } catch (error) {
     handleResponseError(
       `Segment gender data error: ${error.message}`,
