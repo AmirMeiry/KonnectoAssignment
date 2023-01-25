@@ -8,117 +8,6 @@ import {
 } from "../../common/types/db-models/segment";
 import { getDbWrapper } from "../../common/db/mongo-wrapper";
 
-// export async function segmentList(req: Request, res: Response): Promise<void> {
-//     try {
-//     const segmentCollection: Collection = await (
-//       await getDbWrapper()
-//     ).getCollection("segments");
-//     const usersCollection: Collection = await (
-//       await getDbWrapper()
-//     ).getCollection("users");
-//     const metaData = await usersCollection.aggregate([
-//       {
-//         $lookup: {
-//           from: "segments",
-//           localField: "segment_ids",
-//           foreignField: "_id",
-//           as: "segments"
-//         }
-//       },
-//       {
-//         $group: {
-//           _id: "$_id",
-//           name: { $first: "$name" },
-//           userCount: { $sum: { $size: "$users" } },
-//           avgIncome: { $avg: "$users.income_level" },
-//           topGender: { $first: "$users.gender" }
-//         }
-//       },
-//       {
-//         $project: {
-//           _id: 0,
-//           name: 1,
-//           userCount: 1,
-//           avgIncome: 1,
-//           topGender: 1
-//         }
-//       }
-//     ]).toArray();
-//     const data = metaData.map((meta: any) => {
-//       return {
-//         name: meta.name,
-//         userCount: meta.userCount,
-//         avgIncome: meta.avgIncome,
-//         topGender: meta.topGender
-//       } as ISegmentMetaData;
-//     });
-//     const totalCount = await segmentCollection.countDocuments();
-//     res.json({ success: true, data, totalCount });
-//   } catch (error) {
-//     handleResponseError(
-//       `SegmentList Error: ${error.message}`,
-//       error.message,
-//       res
-//     );
-//   }
-// }
-
-// export async function segmentList(req: Request, res: Response): Promise<void> {
-//     try {
-//     const segmentCollection: Collection = await (
-//       await getDbWrapper()
-//     ).getCollection("segments");
-//     const usersCollection: Collection = await (
-//       await getDbWrapper()
-//     ).getCollection("users");
-//     const metaData = await segmentCollection.aggregate([
-//       {
-//         $lookup: {
-//           from: "users",
-//           localField: "_id",
-//           foreignField: "segment_ids",
-//           as: "users"
-//         }
-//       },
-//       {
-//         $group: {
-//           _id: "$_id",
-//           name: { $first: "$name" },
-//           userCount: { $sum: { $size: "$users" } },
-//           avgIncome: { $avg: "$users.income_level" },
-//           topGender: { $first: "$users.gender" }
-//         }
-//       },
-//       {
-//         $project: {
-//           _id: 0,
-//           name: 1,
-//           userCount: 1,
-//           avgIncome: 1,
-//           topGender: 1
-//         }
-//       }
-//     ]).toArray();
-//     const data = metaData.map((meta: any) => {
-//       return {
-//         name: meta.name,
-//         userCount: meta.userCount,
-//         avgIncome: meta.avgIncome,
-//         topGender: meta.topGender
-//       } as ISegmentMetaData;
-//     });
-//     const totalCount = await segmentCollection.countDocuments();
-//     res.json({ success: true, data, totalCount });
-//   } catch (error) {
-//     handleResponseError(
-//       `SegmentList Error: ${error.message}`,
-//       error.message,
-//       res
-//     );
-//   }
-// }
-
-
 export async function segmentList(req: Request, res: Response): Promise<void> {
   try {
     //test    
@@ -126,7 +15,7 @@ export async function segmentList(req: Request, res: Response): Promise<void> {
       await getDbWrapper()
     ).getCollection("users");
 
-    var cursor = await usersCollection.find({}, {projection: {gender: 1, income_level: 1, income_type: 1, segment_ids: 1}}).limit(100);
+    var cursor = await usersCollection.find({}, {projection: {gender: 1, income_level: 1, income_type: 1, segment_ids: 1}}).limit(3);
     let segmentArray = [];
     while (await cursor.hasNext()) {
         let batch = await cursor.next();
